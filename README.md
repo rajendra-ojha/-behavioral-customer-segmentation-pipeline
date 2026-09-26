@@ -1,85 +1,405 @@
-# ⚡ Real-Time Face Mask Detection System
+# Behavioral Customer Segmentation
 
-> A production-grade, real-time computer vision application engineered from scratch using **Python** 🐍, **TensorFlow / Keras** 🧠, **OpenCV** 👁️, and **MobileNetV2** 🚀. 
+<div align="center">
 
----
+**RFM + Behavioral Feature Engineering + Unsupervised Clustering**
 
-## 📌 Project Essence & Portfolio Highlights
-Designed specifically for campus placement interviews and industry showcases, this project demonstrates advanced, end-to-end deep learning engineering workflows:
-* **🔥 Transfer Learning & Fine-Tuning:** Leveraging pre-trained ImageNet feature backbones with selective layer unfreezing.
-* **⚡ Real-Time Edge Inference:** Low-latency webcam stream processing with dynamic region-of-interest (ROI) bounding boxes.
-* **🛡️ Optimized Data Pipelines:** High-performance caching, batching, and precise pixel scaling (`[-1, 1]`).
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![NumPy](https://img.shields.io/badge/NumPy-Numerical-013243?style=flat-square&logo=numpy&logoColor=white)](https://numpy.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-150458?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Scikit Learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-Visualization-11557C?style=flat-square)](https://matplotlib.org/)
+[![Seaborn](https://img.shields.io/badge/Seaborn-Visualization-4C72B0?style=flat-square)](https://seaborn.pydata.org/)
+[![Joblib](https://img.shields.io/badge/Joblib-Model%20Persistence-6C757D?style=flat-square)](https://joblib.readthedocs.io/)
+[![Clustering](https://img.shields.io/badge/ML-Clustering-8A2BE2?style=flat-square)](#methodology)
+[![RFM](https://img.shields.io/badge/Analytics-RFM-008080?style=flat-square)](#rfm-analysis)
+[![PCA](https://img.shields.io/badge/Explainability-PCA-7952B3?style=flat-square)](#visualization)
 
----
+</div>
 
-## 🗂️ Table of Contents
-1. [Dataset Description](#-dataset-description)
-2. [Theoretical Foundation & Architecture](#-theoretical-foundation--architecture)
-3. [Workflow & Pipeline](#-workflow--pipeline)
-4. [Training & Fine-Tuning Strategy](#-training--fine-tuning-strategy)
-5. [Performance & Accuracy Metrics](#-performance--accuracy-metrics)
-6. [Project Directory Structure](#-project-directory-structure)
-7. [Installation & Execution Guide](#-installation--execution-guide)
+## Overview
 
----
+**Behavioral Customer Segmentation** is an unsupervised machine learning project that groups customers according to their purchasing behavior.
 
-## 📁 1. Dataset Description
-* **Dataset Source:** *Face Mask Detection ~12K Images Dataset* (Ashish Jangra).
-* **Classes:** 
-  * `With Mask` (Index 0)
-  * `Without Mask` (Index 1)
-* **Structure:** Partitioned into dedicated `Train` and `Validation` split directories to ensure rigorous evaluation and prevent data leakage.
+The project uses transaction-level retail data to build **RFM features** and additional behavioral features, preprocesses the customer-level data, compares multiple clustering algorithms, selects a configuration using clustering quality metrics, profiles the discovered segments, and saves the trained model for later use.
 
----
+### What this project demonstrates
 
-## 🧠 2. Theoretical Foundation & Architecture
-
-### Why MobileNetV2 over Custom CNNs?
-* **The Limitations of Scratch CNNs:** Custom Convolutional Neural Networks trained from scratch often overfit on small datasets and struggle with real-world noise like indoor shadows, varied lighting, and facial hair (e.g., mistaking a beard for a dark mask).
-* **Transfer Learning Advantage:** MobileNetV2 is pre-trained on millions of ImageNet images. It natively understands complex human facial geometries, skin textures, and hierarchical edges.
-* **Inverted Residuals & Linear Bottlenecks:** MobileNetV2 uses lightweight depthwise separable convolutions, making it exceptionally fast and optimized for real-time edge streaming without hardware lag.
-
----
-
-## 🔄 3. Workflow & Pipeline
-1. **Data Ingestion:** Images are loaded dynamically using `image_dataset_from_directory` with batching and categorical encoding.
-2. **Preprocessing:** Input dimensions are standardized to `(224, 224, 3)` with MobileNetV2 specific pixel scaling via `preprocess_input` (`[-1, 1]` range).
-3. **Face Localization:** Real-time face coordinates `(x, y, w, h)` are detected frame-by-frame using OpenCV's classical Haar Cascade classifier (`haarcascade_frontalface_default.xml`).
-4. **Inference & UI Rendering:** Cropped face regions are passed to the fine-tuned model for multi-class probability estimation, rendering dynamic bounding boxes (Green for Mask, Red for No Mask) with live confidence overlays.
+- Data cleaning and validation
+- Exploratory Data Analysis
+- RFM analysis
+- Behavioral feature engineering
+- Outlier handling and robust scaling
+- K-Means clustering
+- Agglomerative clustering
+- Gaussian Mixture Models
+- Silhouette, Calinski-Harabasz and Davies-Bouldin evaluation
+- PCA-based cluster visualization
+- Dynamic customer segment naming
+- Model persistence with Joblib
+- New-customer segment prediction when the selected model supports `.predict()`
 
 ---
 
-## ⚙️ 4. Training & Fine-Tuning Strategy
-The model was trained in two robust phases:
-* **Phase 1 (Classifier Head Training):** 
-  * The MobileNetV2 base feature extractor was frozen (`base_model.trainable = False`).
-  * Only the custom dense head (Global Average Pooling -> Dense 128 ReLU -> Dropout 0.4 -> Softmax) was trained for 5 epochs using an Adam optimizer (`lr=0.001`).
-* **Phase 2 (Fine-Tuning):** 
-  * The base model was unfrozen, keeping all layers **except the last 30 layers** frozen to preserve generic feature extraction while specializing the top layers for mask detection.
-  * Recompiled with a micro-learning rate (`1e-5`) for delicate gradient adjustments.
-  * Integrated `EarlyStopping` and `ReduceLROnPlateau` callbacks to halt training automatically at peak convergence.
+## Project Architecture
 
----
-
-## 📊 5. Performance & Accuracy Metrics
-* **Validation Accuracy:** Achieved **100.0% validation accuracy** (`val_accuracy: 1.0000`) and near-zero validation loss (`5.3289e-04`) upon fine-tuning convergence.
-* **Real-World Robustness:** Successfully eliminates false positives caused by facial shadows and unstructured lighting.
-
----
-
-## 📂 6. Project Directory Structure
 ```text
-Real_Time_FaceMask_Detection/
+Customer Transactions
+        |
+        v
+Data Validation & Cleaning
+        |
+        v
+Exploratory Data Analysis
+        |
+        v
+RFM + Behavioral Features
+        |
+        v
+Outlier Handling + Log Transformation
+        |
+        v
+RobustScaler
+        |
+        v
++-------------------------------+
+| Clustering Model Comparison   |
+|                               |
+|  K-Means                      |
+|  Agglomerative Clustering     |
+|  Gaussian Mixture Model       |
++-------------------------------+
+        |
+        v
+Best Configuration
+        |
+        v
+PCA Visualization
+        |
+        v
+Customer Segment Profiling
+        |
+        v
+Saved Model + Metadata
+        |
+        v
+New Customer Segment Prediction
+```
+
+## Dataset
+
+This project uses the **Online Retail II** dataset from the UCI Machine Learning Repository.
+
+The dataset contains real transaction records from a UK-based registered non-store online retailer covering **01/12/2009 to 09/12/2011**. UCI reports **1,067,371 instances** and 8 transaction variables.
+
+### Main columns
+
+| Column | Description |
+|---|---|
+| `Invoice` | Invoice/transaction identifier |
+| `StockCode` | Product identifier |
+| `Description` | Product description |
+| `Quantity` | Quantity purchased |
+| `InvoiceDate` | Transaction date and time |
+| `Price` | Unit price |
+| `Customer ID` | Customer identifier |
+| `Country` | Customer country |
+
+The dataset is licensed by UCI under **CC BY 4.0**. citeturn0search0
+
+### Download
+
+**Official UCI dataset:**  
+https://archive.ics.uci.edu/dataset/502/online+retail+ii
+
+A Kaggle source is also referenced in the original notebook:
+
+https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci
+
+After downloading, place the CSV/XLSX file inside `data/` and update `RAW_DATA_PATH`.
+
+---
+
+## RFM Analysis
+
+The project calculates:
+
+- **Recency** — days since the customer's most recent purchase
+- **Frequency** — number of distinct orders
+- **Monetary** — total revenue generated
+
+Additional behavioral features include:
+
+- Average Order Value
+- Total Quantity
+- Unique Products
+- Average Items per Order
+- Customer Lifetime Days
+- Average Days Between Purchases
+- Purchase Frequency Rate
+- Product Diversity Ratio
+- Primary Country
+
+---
+
+## Methodology
+
+### 1. Data Cleaning
+
+The pipeline removes or handles:
+
+- Invalid transaction dates
+- Missing customer IDs
+- Missing descriptions
+- Duplicate rows
+- Cancelled invoices
+- Non-positive quantities
+- Non-positive prices
+
+### 2. Feature Engineering
+
+Customer-level features are generated from transaction-level records.
+
+### 3. Outlier Handling
+
+The notebook winsorizes:
+
+- `Monetary`
+- `Frequency`
+- `TotalQuantity`
+
+using the configured upper quantile.
+
+### 4. Transformation and Scaling
+
+Selected skewed numerical features are transformed with `log1p`, followed by `RobustScaler`.
+
+### 5. Clustering
+
+Three unsupervised approaches are compared:
+
+- **K-Means**
+- **Agglomerative Clustering**
+- **Gaussian Mixture Model**
+
+The notebook searches across multiple cluster counts and model configurations.
+
+### 6. Model Evaluation
+
+The clustering configurations are compared using:
+
+- **Silhouette Score** — higher is generally better
+- **Calinski-Harabasz Score** — higher is generally better
+- **Davies-Bouldin Score** — lower is generally better
+
+The implementation sorts candidates by silhouette score and selects the top valid configuration.
+
+### 7. PCA Visualization
+
+PCA reduces the clustering feature space to two components for visual inspection of the discovered customer groups.
+
+### 8. Segment Profiling
+
+Each cluster is profiled using customer count, revenue, recency, frequency, monetary value and average order value.
+
+The notebook dynamically assigns descriptive segment names such as:
+
+- High-Value Frequent Customers
+- High-Spending Occasional Customers
+- Frequent Low-Spend Customers
+- Recently Active Growing Customers
+- At-Risk / Low-Engagement Customers
+- Dormant / Churned Customers
+- Moderate / Average Engagement Customers
+
+The exact segments depend on the data and selected clustering configuration.
+
+---
+
+## Output Files
+
+Running the project creates:
+
+```text
+models/
+├── preprocessing.joblib
+├── clustering_model.joblib
+└── metadata.joblib
+
+reports/
+├── data_quality_report.csv
+├── customer_features.csv
+├── model_comparison.csv
+├── cluster_profiles.csv
+└── figures/
+    ├── 01_revenue_and_customers_over_time.png
+    ├── 02_top_products_and_countries.png
+    ├── 03_monetary_distribution_before_after.png
+    ├── 04_kmeans_elbow_silhouette.png
+    ├── 05_pca_cluster_projection.png
+    ├── 06_segment_customers_and_revenue.png
+    └── 07_cluster_profile_heatmap.png
+```
+
+---
+
+## Project Structure
+
+```text
+behavioral-customer-segmentation/
 │
-├── Face Mask Dataset/
-│   ├── Train/
-│   │   ├── With Mask/
-│   │   └── Without Mask/
-│   └── Validation/
-│       ├── With Mask/
-│       └── Without Mask/
+├── data/
+│   └── README.md
 │
-├── mask_training_and_comparison.ipynb       # Training and evaluation notebook
-├── mobilenet_finetuned_mask_model.keras     # Saved production weights artifact
-├── live_inference.py                        # Real-time webcam inference script
-└── README.md                                # Project documentation
+├── models/
+│   └── generated model files
+│
+├── reports/
+│   ├── figures/
+│   └── generated CSV reports
+│
+├── src/
+│   └── behavioral_customer_segmentation.py
+│
+├── behavioral_customer_segmentation.ipynb
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Installation
+
+```bash
+git clone <your-repository-url>
+cd behavioral-customer-segmentation
+
+python -m venv .venv
+```
+
+### Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Run the Project
+
+### Jupyter Notebook
+
+```bash
+jupyter notebook behavioral_customer_segmentation.ipynb
+```
+
+Before running, update:
+
+```python
+RAW_DATA_PATH = "path/to/online_retail_II.csv"
+```
+
+### Python Script
+
+```bash
+python src/behavioral_customer_segmentation.py
+```
+
+---
+
+## Example New-Customer Prediction
+
+When the selected clustering model supports `.predict()`, the saved model can be used for a new customer:
+
+```python
+predict_segment(
+    recency=15,
+    frequency=8,
+    monetary=950.0,
+    avg_order_value=118.75,
+    total_quantity=64,
+    unique_products=18,
+    customer_lifetime_days=220,
+)
+```
+
+The function returns the predicted cluster and its associated business profile.
+
+---
+
+## Business Use Cases
+
+Customer segments generated by this project can support:
+
+- Customer retention campaigns
+- High-value customer targeting
+- Re-engagement campaigns
+- Personalized promotions
+- Customer lifecycle analysis
+- Marketing budget allocation
+- Revenue contribution analysis
+- Churn-risk investigation
+
+---
+
+## Key Technical Highlights
+
+```text
+Data Engineering
+      ↓
+RFM Analytics
+      ↓
+Behavioral Feature Engineering
+      ↓
+Unsupervised ML
+      ↓
+Model Evaluation
+      ↓
+Customer Profiling
+      ↓
+Model Persistence
+      ↓
+Inference
+```
+
+This makes the project more than a basic K-Means notebook: it includes data quality checks, feature engineering, algorithm comparison, evaluation, reporting, persistence and an inference path.
+
+---
+
+## Limitations
+
+- This is an unsupervised segmentation project, so clusters do not have predefined ground-truth labels.
+- Segment names are generated from relative customer behavior and should be interpreted as business-oriented descriptions.
+- PCA is used for visualization only; clustering is performed on the full transformed feature space.
+- New-customer prediction is available only when the selected final estimator exposes a compatible `.predict()` method.
+
+---
+
+## Dataset Citation
+
+Chen, D. (2012). **Online Retail II**. UCI Machine Learning Repository.  
+DOI: `10.24432/C5CG6D`
+
+Official dataset page:  
+https://archive.ics.uci.edu/dataset/502/online+retail+ii
+
+---
+
+## Author
+
+**Your Name**
+
+If you use this project in your portfolio, replace the placeholder above with your name and add your GitHub/LinkedIn links.
+
