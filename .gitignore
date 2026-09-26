@@ -1,0 +1,25 @@
+# Raw dataset (too large for GitHub, and not yours to redistribute)
+data/*.csv
+data/*.xlsx
+data/*.xls
+
+# Trained model artifacts (regenerate by re-running the notebook)
+models/*.joblib
+
+# Generated reports (regenerate by re-running the notebook)
+reports/*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
