@@ -1,6 +1,6 @@
 # Behavioral Customer Segmentation
 
-<div align="center">
+
 
 **RFM + Behavioral Feature Engineering + Unsupervised Clustering**
 
@@ -15,7 +15,6 @@
 [![RFM](https://img.shields.io/badge/Analytics-RFM-008080?style=flat-square)](#rfm-analysis)
 [![PCA](https://img.shields.io/badge/Explainability-PCA-7952B3?style=flat-square)](#visualization)
 
-</div>
 
 ## Overview
 
