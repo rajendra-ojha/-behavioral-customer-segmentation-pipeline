@@ -398,7 +398,5 @@ https://archive.ics.uci.edu/dataset/502/online+retail+ii
 
 ## Author
 
-**Your Name**
-
-If you use this project in your portfolio, replace the placeholder above with your name and add your GitHub/LinkedIn links.
+**Rajendra Kumar Ojha**
 
